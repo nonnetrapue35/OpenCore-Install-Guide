@@ -1,96 +1,96 @@
-# Why OpenCore over Clover and others
+# Pourquoi OpenCore plutôt que Clover et autres
 
-This section contains a brief rundown as to why the community has been transitioning over to OpenCore, and aims to dispel a few common myths in the community. Those who just want a macOS machine can skip this page.
+Cette section contient un bref aperçu de la raison pour laquelle la communauté a fait la transition vers OpenCore, et vise à dissiper quelques mythes communs dans la communauté. Ceux qui veulent juste une machine macOS peuvent sauter cette page.
 
 [[toc]]
 
-## OpenCore features
+## Fonctionnalités d'OpenCore
 
-* More OS Support!
-  * OpenCore now supports more versions of OS X and macOS natively without painful hacks Clover and Chameleon had to implement
-  * This includes OSes as far back as 10.4, Tiger, and even the latest builds of 11, Big Sur!
-* On average, OpenCore systems boot faster than those using Clover as less unnecessary patching is done
-* Better overall stability as patches can be much more precise:
-  * [macOS 10.15.4 update](https://www.reddit.com/r/hackintosh/comments/fo9bfv/macos_10154_update/)
-  * AMD OSX patches not needing to update with every minor security update
-* Better overall security in many forms:
-  * No need to disable System Integrity Protection (SIP)
-  * Built-in FileVault 2 support
-  * [Vaulting](https://dortania.github.io/OpenCore-Post-Install/universal/security.html#Vault) allowing to create EFI snapshots preventing unwanted modifications
-  * True secure-boot support
-    * Both UEFI and Apple's variant
-* BootCamp switching and boot device selection are supported by reading NVRAM variables set by Startup Disk, just like a real Mac.
-* Supports boot hotkey via `boot.efi` - hold `Option` or `ESC` at startup to choose a boot device, `Cmd+R` to enter Recovery or `Cmd+Opt+P+R` to reset NVRAM.
+* Plus de support OS !
+  * OpenCore supporte maintenant plus de versions d'OS X et de macOS en natif, sans les douloureux hacks que Clover et Chameleon ont dû mettre en place.
+  * Cela inclut des systèmes d'exploitation aussi anciens que 10.4, Tiger, et même les dernières versions de 11, Big Sur !
+* En moyenne, les systèmes OpenCore démarrent plus rapidement que ceux utilisant Clover car moins de correctifs inutiles sont effectués.
+* Meilleure stabilité globale car les correctifs peuvent être beaucoup plus précis :
+  * [mise à jour macOS 10.15.4](https://www.reddit.com/r/hackintosh/comments/fo9bfv/macos_10154_update/)
+  * Les correctifs AMD OSX ne nécessitent pas de mise à jour à chaque mise à jour de sécurité mineure.
+* Meilleure sécurité globale sous plusieurs formes :
+  * Pas besoin de désactiver la Protection de l'Intégrité du Système (SIP)
+  * Support intégré de FileVault 2
+  * [Vaulting](https://dortania.github.io/OpenCore-Post-Install/universal/security.html#Vault) permettant de créer des snapshots EFI empêchant toute modification non désirée.
+ * Prise en charge réelle du démarrage sécurisé
+    * UEFI et la variante d'Apple
+* La commutation BootCamp et la sélection du périphérique de démarrage sont prises en charge par la lecture des variables NVRAM définies par Startup Disk, comme sur un vrai Mac.
+* Supporte les raccourcis clavier de démarrage via `boot.efi` - maintenez `Option` ou `ESC` au démarrage pour choisir un périphérique de démarrage, `Cmd+R` pour entrer en restauration ou `Cmd+Opt+P+R` pour réinitialiser la NVRAM.
 
-### Software Support
+### Support logiciel
 
-The biggest reason someone may want to switch from other boot loaders is actually software support:
+La principale raison pour laquelle quelqu'un peut vouloir passer d'un autre chargeur de démarrage à un autre est en fait le support logiciel :
 
-* Kexts no longer testing for Clover:
-  * Got a bug with a kext? Many developers including the organization [Acidanthera](https://github.com/acidanthera) (maker of most of your favorite kexts) won't provide support unless on OpenCore
-* Many firmware drivers being merged into OpenCore:
-  * [APFS Support](https://github.com/acidanthera/AppleSupportPkg)
-  * [FileVault support](https://github.com/acidanthera/AppleSupportPkg)
-  * [Firmware patches](https://github.com/acidanthera/AptioFixPkg)
-* [AMD OSX patches](https://github.com/AMD-OSX/AMD_Vanilla/tree/opencore):
-  * Have AMD-based hardware? The kernel patches required to boot macOS no longer support Clover – they now only support OpenCore.
+* Les kext ne sont plus testés pour Clover :
+  * Vous avez un problème avec un kext ? De nombreux développeurs, y compris le groupe [Acidanthera](https://github.com/acidanthera) (créateur de la plupart de vos kexts préférés) ne fournira pas de support à moins qu'il ne s'agisse d'OpenCore.
+* * De nombreux pilotes de firmware ont été fusionnés dans OpenCore :
+  * [Support APFS](https://github.com/acidanthera/AppleSupportPkg)
+  * [Support FileVault](https://github.com/acidanthera/AppleSupportPkg)
+  * [Corrections du firmware](https://github.com/acidanthera/AptioFixPkg)
+* [Patches AMD OSX](https://github.com/AMD-OSX/AMD_Vanilla/tree/opencore):
+  * Vous avez du matériel basé sur AMD ? Les correctifs du noyau nécessaires pour démarrer macOS ne prennent plus en charge Clover - ils ne prennent désormais en charge qu'OpenCore.
 
-### Kext Injection
+### Injection de Kext 
 
-To better understand OpenCore's kext injection system, we should first look at how Clover works:
+Pour mieux comprendre le système d'injection de kext d'OpenCore, nous devons d'abord examiner le fonctionnement de Clover :
 
-1. Patches SIP open
-2. Patches to enable XNU's zombie code for kext injection
-3. Patches race condition with kext injection
-4. Injects kexts
-5. Patches SIP back in
+1. Correctifs SIP ouverts
+2. Correctifs pour activer le code zombie de XNU pour l'injection de kext.
+3. Correctif de la condition de course avec l'injection de kext
+4. Injection de kexts
+5. Rattachement de SIP
 
-Things to note with Clover's method:
+Les choses à noter avec la méthode de Clover :
 
-* Calling XNU's zombie code that hasn't been used since 10.7, it's seriously impressive Apple hasn't removed this code yet
-  * OS updates commonly break this patch, like recently with 10.14.4 and 10.15
-* Disables SIP and attempts to re-enable it, don't think much needs to be said
-* Likely to break with macOS 11.0 (Big Sur)
-* Supports OS X all the way back to 10.5
+* Appeler le code zombie de XNU qui n'a pas été utilisé depuis 10.7, c'est vraiment impressionnant qu'Apple n'ait pas encore supprimé ce code.
+  * Les mises à jour de l'OS cassent souvent ce patch, comme récemment avec les versions 10.14.4 et 10.15.
+* Désactive SIP et tente de le réactiver, je pense qu'il n'y a pas grand chose à dire.
+* Probabilité de rupture avec macOS 11.0 (Big Sur)
+* Supporte OS X jusqu'à la version 10.5
 
-Now let's take a look at OpenCore's method:
+Voyons maintenant la méthode d'OpenCore :
 
-1. Takes existing prelinked kernel and kexts ready to inject
-2. Rebuilds the cache in the EFI environment with the new kexts
-3. Adds this new cache in
+1. Prend le noyau existant pré-relié et les kexts prêts à être injectés.
+2. Reconstruit le cache dans l'environnement EFI avec les nouveaux kexts.
+3. Ajoute ce nouveau cache
 
-Things to note with OpenCore's method:
+Les choses à noter avec la méthode d'OpenCore :
 
-* OS agnostic as the prelinked kernel format has stayed the same since 10.6 (v2), far harder to break support.
-  * OpenCore also supports prelinked kernel (v1, found in 10.4 and 10.5), cacheless, Mkext and KernelCollections, meaning it also has proper support for all Intel versions of OS X/macOS
-* Far better stability as there is far less patching involved
+* Agnostique au système d'exploitation car le format du noyau prélié est resté le même depuis 10.6 (v2), beaucoup plus difficile à casser.
+  * OpenCore supporte également le noyau pré-connecté (v1, trouvé dans 10.4 et 10.5), sans cache, Mkext et KernelCollections, ce qui signifie qu'il supporte toutes les versions Intel de OS X/macOS.
+* Meilleure stabilité car il y a beaucoup moins de correctifs à apporter.
 
-## OpenCore's shortcomings
+## Les défauts d'OpenCore
 
-The majority of Clover's functionality is actually supported in OpenCore in the form of some quirk, however when transitioning you should pay close attention to OpenCore's missing features as this may or may not affect yourself:
+La majorité des fonctionnalités de Clover sont en fait supportées dans OpenCore sous la forme d'une particularité. Cependant, lors de la transition, vous devez prêter une attention particulière aux fonctionnalités manquantes d'OpenCore car cela peut vous affecter ou non :
 
-* Does not support booting MBR-based operating systems
-  * Work around is to chain-load rEFInd once in OpenCore
-* Does not support UEFI-based VBIOS patching
-  * This can be done in macOS however
-* Does not support automatic DeviceProperty injection for legacy GPUs
-  * ie. InjectIntel, InjectNvidia and InjectAti
-  * This can be done manually however: [GPU patching](https://dortania.github.io/OpenCore-Post-Install/gpu-patching/)
-* Does not support IRQ conflict patching
-  * Can be resolved with [SSDTTime](https://github.com/corpnewt/SSDTTime)
-* Does not support P and C state generation for older CPUs
-* Does not support Target Bridge ACPI patching
-* Does not support Hardware UUID Injection
-* Does not support auto-detection for many Linux bootloader
-  * Can be resolved by adding an entry in `BlessOverride`
-* Does not support many of Clover's XCPM patches
-  * ie. Ivy Bridge XCPM patches
-* Does not support hiding specific drives
-* Does not support changing settings within OpenCore's menu
-* Does not patch PCIRoot UID value
-* Does not support macOS-only ACPI injection and patching
+* Ne supporte pas le démarrage des systèmes d'exploitation basés sur MBR.
+  * La solution consiste à charger en chaîne REFInd une fois dans OpenCore.
+* Ne supporte pas les patchs VBIOS basés sur l'UEFI.
+  * Ceci peut être fait dans macOS cependant
+* Ne prend pas en charge l'injection automatique de DeviceProperty pour les anciens GPU.
+  * c'est-à-dire InjectIntel, InjectNvidia et InjectAti.
+  * Ceci peut toutefois être fait manuellement : [Correctifs GPU](https://dortania.github.io/OpenCore-Post-Install/gpu-patching/)
+* Ne supporte pas le patch de conflit d'IRQ
+  * Peut être résolu avec [SSDTTime](https://github.com/corpnewt/SSDTTime)
+* Ne prend pas en charge la génération des états P et C pour les anciens processeurs.
+* Ne prend pas en charge les correctifs ACPI de Target Bridge.
+* Ne supporte pas l'injection d'UUID matériel
+* Ne prend pas en charge l'auto-détection pour de nombreux chargeurs de démarrage Linux.
+  * Peut être résolu en ajoutant une entrée dans `BlessOverride`
+* Ne prend pas en charge la plupart des correctifs XCPM de Clover.
+  * c'est-à-dire les correctifs XCPM Ivy Bridge
+* Ne permet pas de cacher des lecteurs spécifiques
+* Ne supporte pas la modification des paramètres dans le menu d'OpenCore
+* Ne corrige pas la valeur UID de PCIRoot
+* Ne supporte pas l'injection et la correction de l'ACPI pour macOS seulement.
 
-## Common Myths
+## Les mythes courants (en cours de traduction)
 
 ### Is OpenCore unstable as it's a beta?
 
